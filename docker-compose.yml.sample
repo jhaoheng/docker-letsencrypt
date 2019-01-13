@@ -13,12 +13,13 @@ services:
   
   letsencrypt:
     image: certbot/certbot
+    container_name: letsencrypt
     volumes:
       - ./public:/public # root
       - ./letsencrypt:/etc/letsencrypt
     environment:  
       - DOMAIN=
       - PUBLIC_PATH=/public
-    
+    tty: true
     command: sh -c "certonly --no-eff-email --agree-tos --webroot -w $$PUBLIC_PATH -d $$DOMAIN"
     
