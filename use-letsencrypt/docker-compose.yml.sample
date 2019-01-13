@@ -19,7 +19,8 @@ services:
       - ./letsencrypt:/etc/letsencrypt
     environment:  
       - DOMAIN=
+      - EMAIL=
       - PUBLIC_PATH=/public
     tty: true
-    command: sh -c "certonly --no-eff-email --agree-tos --webroot -w $$PUBLIC_PATH -d $$DOMAIN"
+    command: sh -c "certonly --no-eff-email -m $$EMAIL --agree-tos --webroot -w $$PUBLIC_PATH -d $$DOMAIN"
     
