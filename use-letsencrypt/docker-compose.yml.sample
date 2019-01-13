@@ -9,7 +9,7 @@ services:
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./nginx/ssl:/etc/nginx/ssl
-      - ./public:/usr/share/nginx/html # root
+      - ./public:/var/www/acme-challenge/ # root
   
   letsencrypt:
     image: certbot/certbot
