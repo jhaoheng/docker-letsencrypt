@@ -21,6 +21,6 @@ services:
       - DOMAIN=
       - EMAIL=
       - PUBLIC_PATH=/public
-    tty: true
-    command: sh -c "certonly --no-eff-email -m $$EMAIL --agree-tos --webroot -w $$PUBLIC_PATH -d $$DOMAIN"
+    entrypoint: /bin/sh -c "certbot certonly --no-eff-email -m $$EMAIL --agree-tos --webroot -w $$PUBLIC_PATH -d $$DOMAIN"
+
     
