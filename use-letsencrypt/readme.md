@@ -1,46 +1,25 @@
-# 使用 certbot-auto-process.sh
-1. linux 須已安裝好 nginx
-2. 設定 crontab : `0 */12 * * * /bin/sh /{path}/certbot-auto-process.sh`
-    - 一天執行兩次的檢查
-    - 若設定長時間的 renew, 當系統崩潰重啟時, cron 的日期也會重新計算
+# ex1 : certbot 獨立 container
+> 將 nginx 與 certbot 分別為不同的 container
 
+- 此為一次性產生憑證與 nginx 關係
+- 兩者可為不同 container, 但 nginx 需要 reload 才能使用新憑證, 故可參考 ex2 將 nginx 與 certbot 合在一起的 container
 
-# 查看憑證是否到期
+# ex2 : 在 nginx 中裝 certbot
+> 使用 certbot-auto-process.sh
+
+1. 啟動 docker-compose
+    - 設定 domain & email
+2. 產生憑證 : `certbot certonly --no-eff-email -m $EMAIL --agree-tos --webroot -w $PUBLIC_PATH -d $DOMAIN`
+    - 檢查憑證到期日
+    - 若要求自動化 ... 可在每次 container 啟動的 entrypoint 時執行, 並同時設定 crontab
+3. 設定 crontab : 
+    - `0 */12 * * * certbot renew --cert-name $DOMAIN --deploy-hook "sh /usr/local/src/update-nginx-ssl.sh"`
+        - 一天執行兩次的檢查
+        - 若設定長時間的 renew, 當系統崩潰重啟時, cron 的日期也會重新計算
+    - 確定執行 cron 在背景 : `service cron status`
+
+# 查看憑證日期
 `openssl x509 -noout -dates -in {your-crt or your-pem}`
 
 
 
-# [standalone] 使用 80,443 ports, 產生憑證
-## Run with Docker
-https://certbot.eff.org/docs/install.html#running-with-docker
-
-## 產生憑證
-```
-docker run -it --rm --name certbot \
-            -v "/etc/letsencrypt:/etc/letsencrypt" \
-            -v "/var/lib/letsencrypt:/var/lib/letsencrypt" \
-            -p 80:80 -p 443:443 \
-            certbot/certbot certonly --standalone -d {DOMAIN}
-```
-
-## Renew
-```
-docker run -it --rm --name certbot -v "/etc/letsencrypt:/etc/letsencrypt" -p 80:80 -p 443:443 certbot/certbot renew
-```
-
-
-# [certonly] 使用既有服務的 80, 443 ports
-## 流程
-1. 啟動佔用 80,443 ports 的應用程式服務
-2. 執行產生憑證
-3. 更新 nginx.conf : 新增 ssl 設定
-4. 執行 `nginx -s reload`
-
-## 啟動 nginx, 並佔用 80,443 ports
-1. `docker run -d -p 80:80 -p 443:443 -v $(pwd)/html:/usr/share/nginx/html nginx:1.15.5`
-
-## 申請憑證
-2. `docker run --rm -v $(pwd)/letsencrypt:/etc/letsencrypt -v $(pwd)/html:/html -it certbot/certbot certonly --agree-tos --webroot -w /html -d {DOMAIN}`
-
-## renew
-3. `docker run -it --rm -v "$(pwd)/letsencrypt:/etc/letsencrypt" -v $(pwd)/html:/html certbot/certbot --webroot -w /html renew`
