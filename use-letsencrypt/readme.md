@@ -12,6 +12,7 @@
 2. 產生憑證 : `certbot certonly --no-eff-email -m $EMAIL --agree-tos --webroot -w $PUBLIC_PATH -d $DOMAIN`
     - 檢查憑證到期日
     - 若要求自動化 ... 可在每次 container 啟動的 entrypoint 時執行, 並同時設定 crontab
+    - 執行更新 nginx 的 ssl : `sh update-nginx-ssl.sh`
 3. 設定 crontab : 
     - `0 */12 * * * certbot renew --cert-name $DOMAIN --deploy-hook "sh /usr/local/src/update-nginx-ssl.sh"`
         - 一天執行兩次的檢查
