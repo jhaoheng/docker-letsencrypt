@@ -1,5 +1,17 @@
+# 使用 certbot-auto-process.sh
+1. linux 須已安裝好 nginx
+2. 設定 crontab : `0 */12 * * * /bin/sh /{path}/certbot-auto-process.sh`
+    - 一天執行兩次的檢查
+    - 若設定長時間的 renew, 當系統崩潰重啟時, cron 的日期也會重新計算
+
+
+# 查看憑證是否到期
+`openssl x509 -noout -dates -in {your-crt or your-pem}`
+
+
+
 # [standalone] 使用 80,443 ports, 產生憑證
-# Run with Docker
+## Run with Docker
 https://certbot.eff.org/docs/install.html#running-with-docker
 
 ## 產生憑證
